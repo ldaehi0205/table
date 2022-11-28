@@ -1,8 +1,10 @@
+/* eslint-disable @typescript-eslint/no-use-before-define */
 import type { ColumnType } from '@/interface';
 import Table from 'rc-table';
 import { useState } from 'react';
 import { Resizable } from 'react-resizable';
 import 'react-resizable/css/styles.css';
+import styled from 'styled-components';
 import '../../assets/index.less';
 
 const TBODY_MOCKING = [
@@ -172,7 +174,7 @@ const ResizableTitle = props => {
 
   return (
     <Resizable width={width} height={0} onResize={onResize}>
-      <th {...restProps} />
+      <Th {...restProps} />
     </Resizable>
   );
 };
@@ -188,14 +190,22 @@ interface RecordType {
 const Demo = () => {
   const [state, setState] = useState({
     columns: [
+      { title: '', dataIndex: 'ckeck', key: 'ckeck', className: 'tblColumn', width: 50 },
+      { title: '', dataIndex: 'icon', key: 'icon', className: 'icon', width: 50 },
       { title: 'Device', dataIndex: 'a', key: 'a', width: 100 },
       { title: 'Version', dataIndex: 'b', key: 'b', width: 100 },
       { title: 'API Level', dataIndex: 'c', key: 'c', width: 200 },
       { title: 'Resolution', dataIndex: 'd', key: 'd', width: 200 },
-      { title: 'Pixel Ratio', dataIndex: 'e', key: 'e', width: 200 },
+      { title: 'Pixel Ratio', dataIndex: 'e', key: 'e' },
     ],
   });
-  // console.log(state, '--');
+
+  const BodyRow = styled.tr`
+    & th {
+      /* transition: all 0.3s; */
+    }
+  `;
+
   const components = {
     header: {
       cell: ResizableTitle,
@@ -243,63 +253,19 @@ const Demo = () => {
 
 export default Demo;
 
-// class Demo extends React.Component<{}, DemoState> {
-//   state: DemoState = {
-//     columns: [
-//       { title: 'title1', dataIndex: 'a', key: 'a', width: 100 },
-//       { title: 'title2', dataIndex: 'b', key: 'b', width: 100 },
-//       { title: 'title3', dataIndex: 'c', key: 'c', width: 200 },
-//       {
-//         title: 'Operations',
-//         dataIndex: '',
-//         key: 'd',
-//         render() {
-//           return <a href="#">Operations</a>;
-//         },
-//       },
-//     ],
-//   };
+const Th = styled.th`
+  border: 5px solid blue;
 
-//   components = {
-//     header: {
-//       cell: ResizableTitle,
-//     },
-//   };
+  &:nth-child(1) {
+    border-right: none !important;
 
-//   data = [
-//     { a: '123', key: '1' },
-//     { a: 'cdd', b: 'edd', key: '2' },
-//     { a: '1333', c: 'eee', d: 2, key: '3' },
-//   ];
-
-//   handleResize =
-//     index =>
-//     (e, { size }) => {
-//       this.setState(({ columns }) => {
-//         const nextColumns = [...columns];
-//         nextColumns[index] = {
-//           ...nextColumns[index],
-//           width: size.width,
-//         };
-//         return { columns: nextColumns };
-//       });
-//     };
-
-//   render() {
-//     const columns = this.state.columns.map((col, index) => ({
-//       ...col,
-//       onHeaderCell: (column: ColumnType<RecordType>) =>
-//         ({
-//           width: column.width,
-//           onResize: this.handleResize(index),
-//         } as any),
-//     }));
-
-//     return (
-//       <div>
-//         <h2>Integrate with react-resizable</h2>
-//         <Table components={this.components} columns={columns} data={this.data} />
-//       </div>
-//     );
-//   }
-// }
+    span {
+      display: none;
+    }
+  }
+  &:nth-child(2) {
+    span {
+      display: none;
+    }
+  }
+`;
