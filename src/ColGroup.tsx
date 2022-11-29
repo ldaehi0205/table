@@ -11,7 +11,6 @@ export interface ColGroupProps<RecordType> {
 function ColGroup<RecordType>({ colWidths, columns, columCount }: ColGroupProps<RecordType>) {
   const cols: React.ReactElement[] = [];
   const len = columCount || columns.length;
-
   // Only insert col with width & additional props
   // Skip if rest col do not have any useful info
   let mustInsert = false;

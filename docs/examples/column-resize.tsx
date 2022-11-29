@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import type { ColumnType } from '@/interface';
 import Table from 'rc-table';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Resizable } from 'react-resizable';
 import 'react-resizable/css/styles.css';
 import styled from 'styled-components';
@@ -169,7 +169,7 @@ const ResizableTitle = props => {
   const { onResize, width, ...restProps } = props;
 
   if (!width) {
-    return <th {...restProps} />;
+    return <th {...restProps} style={{ background: '#eff3ff' }} />;
   }
 
   return (
@@ -188,35 +188,120 @@ interface RecordType {
 }
 
 const Demo = () => {
-  const [state, setState] = useState({
+  const sortData = v => {
+    return TBODY_MOCKING.sort((a, b) => v * a.device.model.localeCompare(b.device.model));
+  };
+
+  const [state, setState] = useState<any>({ columns: [] });
+  const [body, setBody] = useState<any>({});
+  const [sort, setSort] = useState(false);
+
+  const initData = {
     columns: [
       { title: '', dataIndex: 'ckeck', key: 'ckeck', className: 'tblColumn', width: 50 },
       { title: '', dataIndex: 'icon', key: 'icon', className: 'icon', width: 50 },
-      { title: 'Device', dataIndex: 'a', key: 'a', width: 100 },
-      { title: 'Version', dataIndex: 'b', key: 'b', width: 100 },
-      { title: 'API Level', dataIndex: 'c', key: 'c', width: 200 },
-      { title: 'Resolution', dataIndex: 'd', key: 'd', width: 200 },
-      { title: 'Pixel Ratio', dataIndex: 'e', key: 'e' },
+      {
+        title: (
+          <div id="device" onClick={() => setSort(prev => !prev)}>
+            Device
+          </div>
+        ),
+        dataIndex: 'a',
+        key: 'a',
+        width: 100,
+      },
+      {
+        title: <div>Version</div>,
+        dataIndex: 'b',
+        key: 'b',
+        width: 100,
+      },
+      {
+        title: <div>API Level</div>,
+        dataIndex: 'c',
+        key: 'c',
+        width: 200,
+      },
+      {
+        title: <div>Resolution</div>,
+        dataIndex: 'd',
+        key: 'd',
+        width: 200,
+      },
+      { title: <div>Pixel Ratio</div>, dataIndex: 'e', key: 'e' },
     ],
-  });
+  };
+
+  useEffect(() => {
+    setState(initData);
+  }, []);
+
+  useEffect(() => {
+    if (sort) {
+      setBody(makeBody(sortData(-1)));
+    } else {
+      setBody(makeBody(sortData(1)));
+    }
+  }, [sort]);
 
   const BodyRow = styled.tr`
-    & th {
-      /* transition: all 0.3s; */
+    & td {
+      /* display: flex;
+      justify-content: center; */
+      padding: 16px 0px;
+      text-align: center;
     }
   `;
 
   const components = {
     header: {
+      // row: HeaderRow,
       cell: ResizableTitle,
+    },
+    body: {
+      row: BodyRow,
     },
   };
 
-  const data = [
-    { a: '123', key: '1' },
-    { a: 'cdd', b: 'edd', key: '2' },
-    { a: '1333', c: 'eee', d: 2, key: '3' },
-  ];
+  const makeBody = tbody => {
+    return tbody.map(v => {
+      return {
+        ckeck: (
+          <Cell
+            style={{
+              border: '2px solid #e1e1e1',
+              padding: '0px',
+              width: '20px',
+              height: '20px',
+              margin: 'auto',
+            }}
+          />
+        ),
+        a: (
+          <Cell style={{ borderRight: '2px solid #e1e1e1', padding: '0px' }}>{v.device.model}</Cell>
+        ),
+        b: (
+          <Cell
+            style={{ borderRight: '2px solid #e1e1e1', padding: '0px' }}
+            onClick={() => console.log('222')}
+          >
+            {v.device.version}
+          </Cell>
+        ),
+        c: (
+          <Cell style={{ borderRight: '2px solid #e1e1e1', padding: '0px' }}>
+            {v.device.apiLevel}
+          </Cell>
+        ),
+        d: (
+          <Cell
+            style={{ borderRight: '2px solid #e1e1e1', padding: '0px' }}
+          >{`${v.device.resolution.height} * ${v.device.resolution.width}`}</Cell>
+        ),
+        e: <Cell style={{ padding: '0px' }}>{v.device.scale_factor}</Cell>,
+      };
+    });
+  };
 
   const handleResize =
     index =>
@@ -230,7 +315,9 @@ const Demo = () => {
         return { columns: nextColumns };
       });
     };
-  const columns = state.columns.map((col, index) => ({
+
+  console.log(state, 'state');
+  const columns = state?.columns?.map((col, index) => ({
     ...col,
     onHeaderCell: (column: ColumnType<RecordType>) =>
       ({
@@ -239,12 +326,14 @@ const Demo = () => {
       } as any),
   }));
 
+  if (Object.keys(body).length === 0) return <></>;
+
   return (
     <>
       {
         <div>
           <h2>Integrate with react-resizable</h2>
-          <Table components={components} columns={columns} data={data} />
+          <Table components={components} columns={columns} data={body} />
         </div>
       }
     </>
@@ -254,11 +343,12 @@ const Demo = () => {
 export default Demo;
 
 const Th = styled.th`
-  border: 5px solid blue;
+  /* border: 5px solid blue; */
+  padding: 16px 0px !important;
+  border-right: none !important;
+  background: #eff3ff;
 
   &:nth-child(1) {
-    border-right: none !important;
-
     span {
       display: none;
     }
@@ -268,4 +358,20 @@ const Th = styled.th`
       display: none;
     }
   }
+
+  & span {
+    align-items: center;
+    width: 1px;
+    height: 50%;
+    margin: 12px 0px;
+    background: #91a0d1;
+
+    :hover {
+      height: 100%;
+      margin: 0px;
+      background: red;
+    }
+  }
 `;
+
+const Cell = styled.div``;
